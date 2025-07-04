@@ -1,11 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+declare global {
+  interface Window {
+    Kakao: any;
+  }
+}
 
 const SignInPage = () => {
   const navigate = useNavigate();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Kakao SDK 초기화
+    if (!window.Kakao.isInitialized()) {
+      // 여기에 JavaScript 키를 넣어주세요
+      window.Kakao.init('40101401979f3d1a8bc009ec4c5737ec');
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,13 +37,18 @@ const SignInPage = () => {
       console.log("data:", data);
 
       if (data.success) {
-        navigate("/my-page"); // 로그인 성공시 마이페이지로 이동
+        navigate("/my-page");
       } else {
         setError("아이디 또는 비밀번호가 일치하지 않습니다.");
       }
     } catch (err) {
       setError("서버 오류가 발생했습니다.");
     }
+  };
+
+  const handleKakaoLogin = () => {
+    // 백엔드의 카카오 로그인 엔드포인트로 리다이렉트
+    window.location.href = 'http://localhost:5000/auth/kakao/signin';
   };
 
   return (
@@ -121,11 +140,69 @@ const SignInPage = () => {
               border: "none",
               borderRadius: "4px",
               cursor: "pointer",
+              marginBottom: "1rem",
             }}
           >
             로그인
           </button>
         </form>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            margin: "1.5rem 0",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              height: "1px",
+              backgroundColor: "#ddd",
+            }}
+          />
+          <span
+            style={{
+              padding: "0 1rem",
+              color: "#666",
+              fontSize: "0.9rem",
+            }}
+          >
+            또는
+          </span>
+          <div
+            style={{
+              flex: 1,
+              height: "1px",
+              backgroundColor: "#ddd",
+            }}
+          />
+        </div>
+
+        <button
+          onClick={handleKakaoLogin}
+          style={{
+            width: "100%",
+            padding: "0.75rem",
+            backgroundColor: "#FEE500",
+            color: "#000000",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem",
+            fontWeight: "bold",
+          }}
+        >
+          <img 
+            src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_small.png"
+            alt="카카오 로고"
+            style={{ width: "20px", height: "20px" }}
+          />
+          카카오로 로그인
+        </button>
       </div>
     </div>
   );
