@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
-import { SectionTitle } from "../components/Base/SectionTitle";
-import { Form } from "../components/ui/form";
-import Input from "../components/Forms/Input";
+import { SectionTitle } from "../../components/Base/SectionTitle";
+import { Form } from "../../components/ui/form";
+import Input from "../../components/Forms/Input";
 import SigninForm from "./_components/SigninForm";
 
 export default function Page() {
