@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReactQueryProviders>
-          <div className="max-w-[375px] mx-auto min-h-screen">{children}</div>
+          <div className="w-full mx-auto min-h-screen px-4 sm:max-w-[640px] md:max-w-[768px] lg:max-w-[1024px] xl:max-w-[1280px]">{children}</div>
         </ReactQueryProviders>
       </body>
     </html>

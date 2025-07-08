@@ -1,3 +1,5 @@
+/** @format */
+
 import {
   Dialog,
   DialogTrigger,
@@ -6,29 +8,31 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog";
-import { useState } from "react";
+} from '@/components/ui/dialog';
 
-export default function ForgetUseridDialog({
-  handleSubmit,
-  email,
-  setEmail,
-  isPending,
-  label,
-}: {
-  handleSubmit: (e: React.FormEvent) => void;
+interface AuthDialogProps {
+  onSubmit: (e: React.FormEvent) => void;
   email: string;
   setEmail: (e: string) => void;
   isPending: boolean;
   label: string;
-}) {
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(email);
-  };
+  description?: string;
+  submitButtonText: string;
+  loadingText: string;
+}
 
+export default function AuthDialog({
+  onSubmit,
+  email,
+  setEmail,
+  isPending,
+  label,
+  description,
+  submitButtonText,
+  loadingText,
+}: AuthDialogProps) {
   return (
-    <Dialog>
+    <Dialog onOpenChange={open => !open && setEmail('')}>
       <DialogTrigger asChild>
         <button type="button" className="hover:text-gray-700">
           {label}
@@ -39,14 +43,20 @@ export default function ForgetUseridDialog({
           <DialogTitle>{label}</DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
-          <input
-            type="email"
-            className="w-full border px-3 py-2 rounded"
-            placeholder="가입하신 이메일을 입력해주세요"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="space-y-2">
+            <input
+              type="email"
+              className="w-full border px-3 py-2 rounded"
+              placeholder="가입하신 이메일을 입력해주세요"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
+            {description && (
+              <p className="text-sm text-gray-500">* {description}</p>
+            )}
+          </div>
+
           <DialogFooter>
             <DialogClose asChild>
               <button type="button" className="px-4 py-2 rounded bg-gray-200">
@@ -58,7 +68,7 @@ export default function ForgetUseridDialog({
               className="px-4 py-2 rounded bg-primary text-white"
               disabled={isPending}
             >
-              {isPending ? "전송중..." : "아이디 찾기"}
+              {isPending ? loadingText : submitButtonText}
             </button>
           </DialogFooter>
         </form>

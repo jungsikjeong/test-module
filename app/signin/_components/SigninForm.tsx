@@ -1,27 +1,29 @@
-"use client";
+/** @format */
 
-import { SquareButton } from "@/components/Buttons";
-import Checkbox from "@/components/Buttons/CheckBox";
-import Input from "@/components/Forms/Input";
-import { Form } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import useForgetUserid from "../_hooks/useForgetUserid";
-import React, { useState } from "react";
+'use client';
+
+import { SquareButton } from '@/components/Buttons';
+import Checkbox from '@/components/Buttons/CheckBox';
+import Input from '@/components/Forms/Input';
+import { Form } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import ForgetUseridDialog from "./ForgetUseridDialog";
+  useForgetUserId,
+  useForgetPassword,
+} from '@/queries/auth/mutation-options';
+import React, { useState } from 'react';
+import AuthDialog from './AuthDialog';
 
 export default function SigninForm() {
   const [showModal, setShowModal] = useState(false);
-  const [email, setEmail] = useState("");
-  const { mutate: forgetUserid, isPending } = useForgetUserid();
+  const [email, setEmail] = useState('');
+  const [passwordEmail, setPasswordEmail] = useState('');
+
+  const { mutate: forgetUserid, isPending: isUserIdPending } =
+    useForgetUserId();
+  const { mutate: forgetPassword, isPending: isPasswordPending } =
+    useForgetPassword();
 
   const form = useForm();
   const onSubmit = (data: any) => {
@@ -30,18 +32,60 @@ export default function SigninForm() {
 
   const handleFindIdClick = () => setShowModal(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      alert('올바른 이메일 형식이 아닙니다');
+      return false;
+    }
+    return true;
+  };
+
+  const handleForgetUserIdSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    forgetUserid(email, {
-      onSuccess: () => {
-        alert("아이디가 이메일로 전송되었습니다!");
-        setShowModal(false);
-        setEmail("");
-      },
-      onError: (err: any) => {
-        alert(err.message || "에러가 발생했습니다.");
-      },
-    });
+    if (email && validateEmail(email)) {
+      forgetUserid(
+        { email },
+        {
+          onSuccess: () => {
+            alert('아이디가 이메일로 전송되었습니다!');
+            setShowModal(false);
+            setEmail('');
+          },
+          onError: (error: any) => {
+            if (error.response?.data) {
+              const errorData = error.response.data.message;
+              alert(errorData);
+            } else {
+              alert('에러가 발생했습니다.');
+            }
+          },
+        },
+      );
+    }
+  };
+
+  const handleForgetPasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordEmail && validateEmail(passwordEmail)) {
+      forgetPassword(
+        { email: passwordEmail },
+        {
+          onSuccess: () => {
+            alert('임시 비밀번호가 이메일로 전송되었습니다!');
+            setPasswordEmail('');
+          },
+          onError: (error: any) => {
+            if (error.response?.data) {
+              const errorData = error.response.data.message;
+              alert(errorData);
+            } else {
+              alert('에러가 발생했습니다.');
+            }
+          },
+        },
+      );
+    }
   };
 
   return (
@@ -49,9 +93,9 @@ export default function SigninForm() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-[13px] mt-12 px-4"
+          className="space-y-[13px] mt-12 px-4 "
         >
-          <Input placeholder="아이디" state="default" />
+          <Input placeholder="아이디" state="default" className="w-full" />
 
           <Input placeholder="패스워드" state="default" />
 
@@ -105,24 +149,27 @@ export default function SigninForm() {
           </SquareButton>
 
           <div className="flex items-center justify-around gap-2 text-sm text-gray-500">
-            <ForgetUseridDialog
-              handleSubmit={(e: React.FormEvent) => {
-                e.preventDefault();
-
-                if (email) {
-                  //TODO: 이메일정규화
-                }
-                // forgetUserid
-              }}
+            <AuthDialog
+              onSubmit={handleForgetUserIdSubmit}
               email={email}
               setEmail={setEmail}
-              isPending={isPending}
+              isPending={isUserIdPending}
               label="아이디 찾기"
+              description="입력하신 이메일로 아이디가 발송됩니다."
+              submitButtonText="아이디 찾기"
+              loadingText="전송중..."
             />
             <div className="w-px h-3 bg-gray-300" />
-            <button type="button" className="hover:text-gray-700">
-              비밀번호찾기
-            </button>
+            <AuthDialog
+              onSubmit={handleForgetPasswordSubmit}
+              email={passwordEmail}
+              setEmail={setPasswordEmail}
+              isPending={isPasswordPending}
+              label="비밀번호 찾기"
+              description="입력하신 이메일로 임시 비밀번호가 발송됩니다."
+              submitButtonText="임시 비밀번호 발송"
+              loadingText="전송중..."
+            />
             <div className="w-px h-3 bg-gray-300" />
             <button type="button" className="hover:text-gray-700">
               회원가입
